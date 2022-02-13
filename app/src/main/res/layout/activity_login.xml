@@ -31,6 +31,7 @@
             android:layout_marginRight="30dp">
 
             <EditText
+                android:id="@+id/userEmail"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/user_input_layout"
@@ -40,6 +41,7 @@
                 android:textSize="15dp"/>
 
             <EditText
+                android:id="@+id/userPassword"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/user_input_layout"
@@ -58,7 +60,9 @@
                 android:textAllCaps="false"
                 android:textColor="#ffffff"/>
 
+
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/signInButton"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:background="@null"
