@@ -52,6 +52,7 @@
                 android:textSize="15dp"/>
 
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/createUserButton"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/create_account_button_layout"

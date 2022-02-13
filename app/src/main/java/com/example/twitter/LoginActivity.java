@@ -24,7 +24,7 @@ public class LoginActivity extends AppCompatActivity {
     
     private FirebaseAuth mAuth;
 
-    private AppCompatButton signInButton;
+    private AppCompatButton signInButton, createUserButton;
 
     private EditText userEmail, userPassword;
 
@@ -38,35 +38,40 @@ public class LoginActivity extends AppCompatActivity {
         signInButton = (AppCompatButton) findViewById(R.id.signInButton);
         signInButton.setPaintFlags(signInButton.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
+        createUserButton = (AppCompatButton) findViewById(R.id.createUserButton);
+
         userEmail = (EditText) findViewById(R.id.userEmail);
         userPassword = (EditText) findViewById(R.id.userPassword);
         
 
 
-        signInButton.setOnClickListener(new View.OnClickListener(){
+        createUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-
+            public void onClick(View view) {
                 String email = userEmail.getText().toString();
                 String password = userPassword.getText().toString();
 
-                if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-                    Toast.makeText(LoginActivity.this, "Email or Password is Empty", Toast.LENGTH_SHORT).show();
+                if (emptyCheck(email, password))
                     return;
-                }
+                
 
-                mAuth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    Log.d(TAG, "Success");
-                                } else {
-                                    Log.d(TAG, "Fail : " + task.getException());
-                                }
+                createUserEmail(email, password);
 
-                            }
-                        });
+            }
+        });
+
+        signInButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                String email = userEmail.getText().toString();
+                String password = userPassword.getText().toString();
+
+                if (emptyCheck(email, password))
+                    return;
+
+
+                emailSignIn(email, password);
+
             }
         });
 
@@ -81,4 +86,52 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(this, "nothing users", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private boolean emptyCheck(String email, String password) {
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            Toast.makeText(LoginActivity.this, "Email or Password is Empty", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
+        return false;
+    }
+
+
+    private void emailSignIn(String email, String password) {
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            Log.d("User Email", user.getEmail());
+                            Log.d("User Uid", user.getUid());
+                        } else {
+                            Log.d(TAG, "Fail : " + task.getException());
+                        }
+                    }
+                });
+    }
+
+    private void createUserEmail(String email, String password) {
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // 생성 후 로그인 활성화
+                            // FierbaseUser user = mAuth.getCurrentuser();
+                            Log.d(TAG, "Success");
+                        } else {
+                            Log.d(TAG, "Fail : " + task.getException());
+                        }
+
+                    }
+                });
+    }
+
+    private void logout() {
+        FirebaseAuth.getInstance().signOut();
+    }
+
 }
