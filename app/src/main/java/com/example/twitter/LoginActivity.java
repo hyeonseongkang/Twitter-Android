@@ -57,6 +57,9 @@ public class LoginActivity extends AppCompatActivity {
         userEmail = (EditText) findViewById(R.id.userEmail);
         userPassword = (EditText) findViewById(R.id.userPassword);
 
+        userEmail.setText("12345@naver.com");
+        userPassword.setText("12341234");
+
 
         createUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -131,6 +134,9 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             Log.d("User Email", user.getEmail());
                             Log.d("User Uid", user.getUid());
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
                         } else {
                             Log.d(TAG, "Fail : " + task.getException());
                         }
@@ -145,8 +151,11 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // 생성 후 로그인 활성화
-                            // FierbaseUser user = mAuth.getCurrentuser();
+                            FirebaseUser user = mAuth.getCurrentUser();
                             Log.d(TAG, "Success");
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
                         } else {
                             Log.d(TAG, "Fail : " + task.getException());
                         }
