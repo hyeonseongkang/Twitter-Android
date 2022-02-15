@@ -1,6 +1,7 @@
 package com.example.twitter;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -16,6 +17,7 @@ import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -31,6 +33,7 @@ import com.google.firebase.auth.FirebaseUser;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -87,93 +90,23 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, PICK_IMAGE);
     }
 
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
-//            if (!(data == null)) {
-//                Log.d(TAG, data.getData().toString());
-//
-//                Uri uri = data.getData();
-//
-//                InputStream inputStream = MainActivity.this.getContentResolver().openInputStream(uri);
-//                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-//
-//            }
-//        }
-//    }
 
+    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
+
+            Uri uri = data.getData();
+            Bitmap bitmap;
             try {
-                Bitmap profileImage = profileImage(data.getData());
-                if (profileImage != null) {
-                    System.out.println(profileImage);
-                    userProfile.setImageBitmap(profileImage);
-                }
-            } catch (OutOfMemoryError e) {
-                return;
-            } catch (Exception e) {
-                return;
+                bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), uri));
+                userProfile.setImageBitmap(bitmap);
+            }catch (IOException e) {
+
             }
+
         }
 
     }
-
-    public String BitmapToString(Bitmap bitmap) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[]  b = baos.toByteArray();
-        String temp = Base64.encodeToString(b, Base64.DEFAULT);
-        return temp;
-    }
-
-    public Bitmap profileImage(Uri imgUri){
-        String imagePath = getRealPathFromURI(imgUri);
-        ExifInterface exif = null;
-        try{
-            exif = new ExifInterface(imagePath);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        int exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-        int exifDegree = exifOrientationToDegrees(exifOrientation);
-
-        Bitmap originaImage = BitmapFactory.decodeFile(imagePath);
-        int reduceSize = (int)(originaImage.getHeight()*(1024.0/originaImage.getWidth()));
-        Bitmap reduceImage = Bitmap.createScaledBitmap(originaImage, 1024, reduceSize, true);
-        Bitmap returnImage = rotate(reduceImage, exifDegree);
-        return returnImage;
-
-    }
-
-    public String getRealPathFromURI(Uri contentUri) {
-        int column_index = 0;
-        String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
-        if(cursor.moveToFirst()){
-            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        }
-        return cursor.getString(column_index);
-    }
-
-    public int exifOrientationToDegrees(int exifOrientation){
-        if(exifOrientation == ExifInterface.ORIENTATION_ROTATE_90){
-            return 90;
-        }else if(exifOrientation == ExifInterface.ORIENTATION_ROTATE_180){
-            return 180;
-        }else if(exifOrientation == ExifInterface.ORIENTATION_ROTATE_270){
-            return 270;
-        }
-        return 0;
-    }
-
-    public Bitmap rotate(Bitmap src, float degree){
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degree);
-        return Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), matrix, true);
-    }
-
 }
