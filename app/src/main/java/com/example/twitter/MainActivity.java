@@ -13,8 +13,10 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
+import android.graphics.PorterDuff;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -35,6 +37,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class MainActivity extends AppCompatActivity {
 
     public static String TAG = "MainActivity";
@@ -42,8 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
 
-    private TextView userEmail;
-    private ImageView userProfile;
+    private CircleImageView userProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +56,11 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         FirebaseUser firebaseUser = mAuth.getCurrentUser();
-
-        userEmail = (TextView) findViewById(R.id.userEmail);
         
-        userProfile = (ImageView) findViewById(R.id.userProfile);
+        userProfile = (CircleImageView) findViewById(R.id.userProfile);
         userProfile.setEnabled(true);
         userProfile.setClickable(true);
+        userProfile.setColorFilter(Color.parseColor("#1D9BF0"), PorterDuff.Mode.SRC_IN);
         userProfile.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -67,7 +69,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        userEmail.setText(firebaseUser.getEmail());
+
+
 
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -100,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
             Uri uri = data.getData();
             Bitmap bitmap;
             try {
+                userProfile.setColorFilter(null);
                 bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), uri));
                 userProfile.setImageBitmap(bitmap);
             }catch (IOException e) {
