@@ -51,6 +51,79 @@
 
     </RelativeLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/write_content_layout"
+            android:layout_marginTop="40dp">
+
+            <EditText
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="#ffffff"
+                android:hint="What's on your mind?"
+                android:textColorHint="#C3C3C3"
+                android:background="@null"
+                android:textSize="13dp"
+                android:layout_marginLeft="15dp"
+                android:layout_toLeftOf="@+id/writeButton"
+                android:padding="5dp"/>
+
+
+            <RelativeLayout
+                android:id="@+id/writeButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/write_content_button_layout"
+                android:layout_alignParentRight="true">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/right"
+                    android:tint="#ffffff"
+                    android:layout_centerInParent="true"/>
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/addPhotoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="25dp">
+
+            <TextView
+                android:id="@+id/add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Photos"
+                android:textColor="#1D9BF0"
+                android:textSize="16dp"
+                android:textStyle="bold"/>
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:src="@drawable/plus"
+                android:tint="#1D9BF0"
+                android:layout_toRightOf="@+id/add"
+                android:layout_marginLeft="7dp"
+                android:layout_centerVertical="true"/>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/mainRecyclerView"
