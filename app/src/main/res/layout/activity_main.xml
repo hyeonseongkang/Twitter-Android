@@ -95,12 +95,21 @@
 
         </RelativeLayout>
 
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/photo"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@drawable/continue_with_x_button"
+            android:layout_gravity="center"
+            android:layout_marginTop="25dp"
+            android:visibility="gone"/>
+
         <RelativeLayout
             android:id="@+id/addPhotoButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="18dp"
             android:layout_gravity="center"
-            android:layout_marginTop="25dp">
+            android:layout_marginTop="18dp">
 
             <TextView
                 android:id="@+id/add"
@@ -109,16 +118,16 @@
                 android:text="Add Photos"
                 android:textColor="#1D9BF0"
                 android:textSize="16dp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <ImageView
                 android:layout_width="12dp"
                 android:layout_height="12dp"
-                android:src="@drawable/plus"
-                android:tint="#1D9BF0"
-                android:layout_toRightOf="@+id/add"
+                android:layout_centerVertical="true"
                 android:layout_marginLeft="7dp"
-                android:layout_centerVertical="true"/>
+                android:layout_toRightOf="@+id/add"
+                android:src="@drawable/plus"
+                android:tint="#1D9BF0" />
 
         </RelativeLayout>
 

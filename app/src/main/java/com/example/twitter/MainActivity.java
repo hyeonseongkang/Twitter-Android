@@ -26,6 +26,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,10 +44,13 @@ public class MainActivity extends AppCompatActivity {
 
     public static String TAG = "MainActivity";
     public static final int PICK_IMAGE = 1;
+    public static final int PICK_IMAGE2 = 2;
 
     private FirebaseAuth mAuth;
 
-    private CircleImageView userProfile;
+    private CircleImageView userProfile, photo;
+    private RelativeLayout addPhotoButton;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +69,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, "set user Profile", Toast.LENGTH_SHORT).show();
-                pickImage();
+                pickImage(PICK_IMAGE);
             }
         });
 
+        photo = (CircleImageView) findViewById(R.id.photo);
+        addPhotoButton = (RelativeLayout) findViewById(R.id.addPhotoButton);
+        addPhotoButton.setEnabled(true);
+        addPhotoButton.setClickable(true);
 
+        addPhotoButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                pickImage(PICK_IMAGE2);
+            }
+        });
 
 
 
@@ -87,10 +101,11 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private void pickImage() {
+    private void pickImage(int imageCode) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
-        startActivityForResult(intent, PICK_IMAGE);
+        Log.d(TAG, String.valueOf(imageCode));
+        startActivityForResult(intent, imageCode);
     }
 
 
@@ -98,14 +113,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-
+        if (resultCode == RESULT_OK) {
             Uri uri = data.getData();
             Bitmap bitmap;
             try {
-                userProfile.setColorFilter(null);
                 bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), uri));
-                userProfile.setImageBitmap(bitmap);
+                Log.d(TAG, String.valueOf(requestCode));
+                if (requestCode == 1) {
+                    userProfile.setColorFilter(null);
+                    userProfile.setImageBitmap(bitmap);
+                } else {
+                    photo.setVisibility(View.VISIBLE);
+                    Log.d(TAG, "Hey");
+                    photo.setImageBitmap(bitmap);
+                }
+
             }catch (IOException e) {
 
             }
