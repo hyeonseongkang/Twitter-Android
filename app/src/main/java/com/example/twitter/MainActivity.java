@@ -25,6 +25,7 @@ import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -32,6 +33,8 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,11 +49,16 @@ public class MainActivity extends AppCompatActivity {
     public static final int PICK_IMAGE = 1;
     public static final int PICK_IMAGE2 = 2;
 
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    private DatabaseReference myRef = firebaseDatabase.getReference("Main");
+
     private FirebaseAuth mAuth;
 
     private CircleImageView userProfile, photo;
-    private RelativeLayout addPhotoButton;
+    private RelativeLayout addPhotoButton, writeButton;
 
+    private EditText content;
+    private Bitmap photoBitmap = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
+
+        content = (EditText) findViewById(R.id.content);
 
         FirebaseUser firebaseUser = mAuth.getCurrentUser();
         
@@ -82,6 +92,29 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 pickImage(PICK_IMAGE2);
+            }
+        });
+
+        writeButton = (RelativeLayout) findViewById(R.id.writeButton);
+        writeButton.setEnabled(true);
+        writeButton.setClickable(true);
+        writeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String setContent =  content.getText().toString();
+
+                String key = myRef.push().getKey();
+                String photoKey = null;
+                if (photoBitmap != null) {
+                    photoKey = key;
+                }
+
+                myRef.child(key).setValue(new MainData(firebaseUser.getEmail(), setContent, photoKey));
+
+                content.setText("");
+                photo.setImageBitmap(null);
+                photo.setVisibility(View.GONE);
+                photoBitmap = null;
             }
         });
 
@@ -115,17 +148,17 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             Uri uri = data.getData();
-            Bitmap bitmap;
+
             try {
-                bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), uri));
+                photoBitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), uri));
                 Log.d(TAG, String.valueOf(requestCode));
                 if (requestCode == 1) {
                     userProfile.setColorFilter(null);
-                    userProfile.setImageBitmap(bitmap);
+                    userProfile.setImageBitmap(photoBitmap);
                 } else {
                     photo.setVisibility(View.VISIBLE);
                     Log.d(TAG, "Hey");
-                    photo.setImageBitmap(bitmap);
+                    photo.setImageBitmap(photoBitmap);
                 }
 
             }catch (IOException e) {
