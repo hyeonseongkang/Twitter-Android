@@ -9,6 +9,11 @@ class MainData {
 
     public MainData(){}
 
+    public MainData(String user, String content) {
+        this.user = user;
+        this.content = content;
+    }
+
     public MainData(String user, String content, String photoKey) {
         this.user = user;
         this.content = content;
@@ -24,6 +29,6 @@ class MainData {
     }
 
     public String getPhotoKey() {
-        return photoKey;
+        return photoKey == null ? null : photoKey;
     }
 }

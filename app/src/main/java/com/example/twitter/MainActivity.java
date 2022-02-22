@@ -35,8 +35,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -146,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        getData();
+
 
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -195,5 +200,25 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    private void getData() {
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    Log.d(TAG, String.valueOf(childSnapshot.getValue()));
+                    MainData mainData = childSnapshot.getValue(MainData.class);
+                    Log.d(TAG, mainData.getUser());
+                    Log.d(TAG, mainData.getContent());
+                    Log.d(TAG, mainData.getPhotoKey() == null ? "NULL" : mainData.getPhotoKey());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }
