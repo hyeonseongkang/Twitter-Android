@@ -212,6 +212,26 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, mainData.getUser());
                     Log.d(TAG, mainData.getContent());
                     Log.d(TAG, mainData.getPhotoKey() == null ? "NULL" : mainData.getPhotoKey());
+                    
+                    String photoKey;
+                    if (mainData.getPhotoKey() != null) {
+                        photoKey = mainData.getPhotoKey() + ".jpg";
+                        Log.d("PHOTOKEY", photoKey);
+                        storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                // Got the download URL for 'users/me/profile.png'
+                                Log.d(TAG, uri.toString());
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                // Handle any errors
+                            }
+                        });
+                    }
+
+
                 }
             }
 
