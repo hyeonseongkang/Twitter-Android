@@ -5,6 +5,8 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Activity;
@@ -48,6 +50,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -57,13 +61,19 @@ public class MainActivity extends AppCompatActivity {
     public static final int PICK_IMAGE = 1;
     public static final int PICK_IMAGE2 = 2;
 
+    private FirebaseAuth mAuth;
+
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference myRef = firebaseDatabase.getReference("Main");
 
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private StorageReference storageRef = storage.getReference();
 
-    private FirebaseAuth mAuth;
+    private RecyclerView recyclerView;
+    private RecyclerView.LayoutManager layoutManager;
+    private MainAdapter mainAdapter;
+
+    private List<MainData> mainDataList = new ArrayList<>();
 
     private CircleImageView userProfile, photo;
     private RelativeLayout addPhotoButton, writeButton;
@@ -81,6 +91,12 @@ public class MainActivity extends AppCompatActivity {
         content = (EditText) findViewById(R.id.content);
 
         FirebaseUser firebaseUser = mAuth.getCurrentUser();
+
+        recyclerView = (RecyclerView) findViewById(R.id.mainRecyclerView);
+        layoutManager = new LinearLayoutManager(MainActivity.this);
+        recyclerView.setLayoutManager(layoutManager);
+        mainAdapter = new MainAdapter(mainDataList, firebaseUser.getEmail());
+
         
         userProfile = (CircleImageView) findViewById(R.id.userProfile);
         userProfile.setEnabled(true);
@@ -230,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                     }
-
+                    mainDataList.add(mainData);
 
                 }
             }
@@ -240,5 +256,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        recyclerView.setAdapter(mainAdapter);
     }
 }
