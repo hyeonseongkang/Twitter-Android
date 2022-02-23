@@ -9,7 +9,7 @@
         android:id="@+id/basicLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -65,39 +65,42 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="20dp"
         android:layout_marginLeft="20dp"
-        android:visibility="gone"
-        android:paddingTop="40dp"
-        android:paddingBottom="40dp">
+        android:visibility="visible"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp">
 
         <EditText
             android:id="@+id/modificationContent"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@null"
+            android:layout_height="35dp"
+            android:background="@drawable/modification_content_edittext_layout"
+            android:paddingLeft="15dp"
+            android:textSize="13dp"
             android:hint="I love Anroid!"
-            android:textColor="#000000"
-            android:layout_marginTop="20dp"/>
+            android:textColor="#000000"/>
 
         <Button
             android:id="@+id/updateButton"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="35dp"
             android:layout_below="@+id/modificationContent"
             android:background="@drawable/content_update_button_layout"
             android:text="Update"
             android:textColor="#ffffff"
             android:textAllCaps="false"
-            android:layout_marginTop="35dp"/>
+            android:textSize="13dp"
+            android:layout_marginTop="20dp"/>
 
         <Button
             android:id="@+id/cancelButton"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="35dp"
             android:layout_below="@+id/updateButton"
             android:layout_marginTop="10dp"
             android:background="@drawable/content_update_cancel_button_layout"
             android:text="Cancel"
             android:textColor="#ffffff"
+            android:textSize="13dp"
             android:textAllCaps="false"/>
 
 

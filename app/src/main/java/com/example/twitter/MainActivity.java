@@ -99,49 +99,71 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         mainAdapter = new MainAdapter(mainDataList, firebaseUser.getEmail(),
                 new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            //delete
-                            Object object = view.getTag();
-                            if (object != null) {
-                                final int position = (int) object;
-                                Log.d(TAG, "DELETE");
-                                
-                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                                builder.setTitle("Delete");
-                                builder.setMessage("this tweet delete?");
-                                builder.setPositiveButton("delete", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        myRef.child(mainDataList.get(position).getKey()).removeValue();
-                                        mainDataList.remove(position);
-                                        mainAdapter.notifyItemRemoved(position);
-                                        mainAdapter.notifyDataSetChanged();
-                                    }
-                                });
+                    @Override
+                    public void onClick(View view) {
+                        //delete
+                        Object object = view.getTag();
+                        if (object != null) {
+                            final int position = (int) object;
+                            Log.d(TAG, "DELETE");
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle("Delete");
+                            builder.setMessage("Do you want delete this tweet?");
+                            builder.setPositiveButton("delete", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    myRef.child(mainDataList.get(position).getKey()).removeValue();
+                                    mainDataList.remove(position);
+                                    mainAdapter.notifyItemRemoved(position);
+                                    mainAdapter.notifyDataSetChanged();
+                                }
+                            });
 
-                                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
+                            builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
 
-                                    }
-                                });
+                                }
+                            });
 
-                                builder.show();
-                            }
+                            builder.show();
                         }
-                    },
+                    }},
                 new View.OnClickListener() {
-                        @Override
+                    @Override
                         public void onClick(View view) {
                             //modification
                             Object object = view.getTag();
                             if (object != null) {
                                 final int position = (int) object;
                                 Log.d(TAG, "MODIFICATION");
+                                myRef.child(mainDataList.get(position).getKey()).child("modificationCheck").setValue(true);
+
                             }
                         }
-        });
+                    },
+                new View.OnClickListener() {
+                    @Override
+                        public void onClick(View view) {
+                            // update
+                            Object object = view.getTag();
+                            if (object != null) {
+                                final int position = (int) object;
+
+                            }
+                        }
+                },
+                new View.OnClickListener() {
+                    @Override
+                        public void onClick(View view) {
+                            // cancel
+                            Object object = view.getTag();
+                            if (object != null) {
+                                final int position = (int) object;
+                                myRef.child(mainDataList.get(position).getKey()).child("modificationCheck").setValue(false);
+                            }
+                        }
+                });
         recyclerView.setAdapter(mainAdapter);
         
         userProfile = (CircleImageView) findViewById(R.id.userProfile);
@@ -202,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
 
-                myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, photoKey));
+                myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, photoKey, false));
 
                 content.setText("");
                 photo.setImageBitmap(null);
