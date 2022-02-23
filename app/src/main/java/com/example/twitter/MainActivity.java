@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, mainData.getUser());
                     Log.d(TAG, mainData.getContent());
                     Log.d(TAG, mainData.getPhotoKey() == null ? "NULL" : mainData.getPhotoKey());
-                    
+
                     String photoKey;
                     if (mainData.getPhotoKey() != null) {
                         photoKey = mainData.getPhotoKey() + ".jpg";
