@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -95,8 +97,52 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.mainRecyclerView);
         layoutManager = new LinearLayoutManager(MainActivity.this);
         recyclerView.setLayoutManager(layoutManager);
-        mainAdapter = new MainAdapter(mainDataList, firebaseUser.getEmail());
+        mainAdapter = new MainAdapter(mainDataList, firebaseUser.getEmail(),
+                new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //delete
+                            Object object = view.getTag();
+                            if (object != null) {
+                                final int position = (int) object;
+                                Log.d(TAG, "DELETE");
+                                
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                builder.setTitle("Delete");
+                                builder.setMessage("this tweet delete?");
+                                builder.setPositiveButton("delete", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        myRef.child(mainDataList.get(position).getKey()).removeValue();
+                                        mainDataList.remove(position);
+                                        mainAdapter.notifyItemRemoved(position);
+                                        mainAdapter.notifyDataSetChanged();
+                                    }
+                                });
 
+                                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                                    }
+                                });
+
+                                builder.show();
+                            }
+                        }
+                    },
+                new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //modification
+                            Object object = view.getTag();
+                            if (object != null) {
+                                final int position = (int) object;
+                                Log.d(TAG, "MODIFICATION");
+                            }
+                        }
+        });
+        recyclerView.setAdapter(mainAdapter);
         
         userProfile = (CircleImageView) findViewById(R.id.userProfile);
         userProfile.setEnabled(true);
@@ -156,12 +202,14 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
 
-                myRef.child(key).setValue(new MainData(firebaseUser.getEmail(), setContent, photoKey));
+                myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, photoKey));
 
                 content.setText("");
                 photo.setImageBitmap(null);
                 photo.setVisibility(View.GONE);
                 photoBitmap = null;
+
+                recyclerView.scrollToPosition(mainDataList.size());
             }
         });
 
@@ -222,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                mainDataList.clear();
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                     Log.d(TAG, String.valueOf(childSnapshot.getValue()));
                     MainData mainData = childSnapshot.getValue(MainData.class);
@@ -247,6 +296,7 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                     mainDataList.add(mainData);
+                    mainAdapter.notifyDataSetChanged();
 
                 }
             }
@@ -257,6 +307,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        recyclerView.setAdapter(mainAdapter);
     }
 }

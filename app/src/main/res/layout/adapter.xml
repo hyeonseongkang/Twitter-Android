@@ -2,24 +2,33 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/adapter_layout">
+    android:background="@drawable/adapter_layout"
+    android:layout_marginTop="20dp">
 
     <RelativeLayout
         android:id="@+id/basicLayout"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:visibility="visible">
 
-        <TextView
-            android:id="@+id/content"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="I love Anroid!sdsdsdsdsdsdsdsdsdsdssdsdsdsdsdsdsdsdsdsdsdsd"
-            android:textColor="#000000"
-            android:textSize="18dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="20dp"
-            android:layout_toLeftOf="@+id/right"/>
+            android:paddingTop="30dp"
+            android:paddingBottom="30dp">
+
+            <TextView
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I love Android Programming"
+                android:textColor="#000000"
+                android:textSize="18dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"/>
+
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/right"
@@ -31,29 +40,34 @@
 
             <ImageButton
                 android:id="@+id/delete"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="17dp"
+                android:layout_height="17dp"
                 android:background="@drawable/trashbox"
                 android:layout_marginRight="12dp"/>
 
             <ImageButton
                 android:id="@+id/modification"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="17dp"
+                android:layout_height="17dp"
                 android:background="@drawable/pencil"
                 android:layout_toRightOf="@+id/delete"/>
 
 
         </RelativeLayout>
+
     </RelativeLayout>
+
+
 
     <RelativeLayout
         android:id="@+id/modificationLayout"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         android:layout_marginRight="20dp"
         android:layout_marginLeft="20dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:paddingTop="40dp"
+        android:paddingBottom="40dp">
 
         <EditText
             android:id="@+id/modificationContent"
@@ -68,7 +82,7 @@
             android:id="@+id/updateButton"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_below="@+id/modiContent"
+            android:layout_below="@+id/modificationContent"
             android:background="@drawable/content_update_button_layout"
             android:text="Update"
             android:textColor="#ffffff"
