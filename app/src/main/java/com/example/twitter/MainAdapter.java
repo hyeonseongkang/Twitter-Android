@@ -17,11 +17,17 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
 
@@ -31,6 +37,7 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
     static public DatabaseReference myRef = firebaseDatabase.getReference("Main");
 
     static public List<MainData> dataList;
+    static public List<Uri> photoUriList;
     public String userEmail;
 
     static public View.OnClickListener clickDelete;
@@ -47,6 +54,8 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
 
         public TextView content;
         public ImageButton delete, modification;
+
+        private CircleImageView photo;
 
         public MyViewHolder(View v, int viewType) {
             super(v);
@@ -66,6 +75,8 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
 
                 delete = (ImageButton) v.findViewById(R.id.delete);
                 modification = (ImageButton) v.findViewById(R.id.modification);
+
+                photo = (CircleImageView) v.findViewById(R.id.photo);
 
                 delete.setOnClickListener(clickDelete);
                 modification.setOnClickListener(clickModification);
@@ -97,12 +108,13 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
         }
     }
 
-    public MainAdapter(List<MainData> getDataList, String getUserEmail,
+    public MainAdapter(List<MainData> getDataList, List<Uri>getPhotoUriList,String getUserEmail,
                        View.OnClickListener deleteListener,
                        View.OnClickListener modificationListener,
                        View.OnClickListener cancelListener
                        ) {
         this.dataList = getDataList;
+        this.photoUriList = getPhotoUriList;
         this.userEmail = getUserEmail;
         clickDelete = deleteListener;
         clickModification = modificationListener;
@@ -150,6 +162,16 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                 holder.modificationLayout.setVisibility(View.VISIBLE);
                 holder.modificationContent.setText(dataList.get(position).getContent());
                 holder.content.setTag(R.drawable.adapter_layout, holder.content.getText().toString());
+
+                // photoKey가 있다면 -> 사진까지 저장 했다면
+                String data = null;
+                data = dataList.get(position).getPhotoKey();
+                Log.d("메인어답터", data == null ? "NULL" : data);
+                if (dataList.get(position).getPhotoKey() != null) {
+                    Uri uri = Uri.parse(dataList.get(position).getPhotoUri());
+                    Glide.with(holder.photo.getContext()).load(uri).into(holder.photo); // Glide를 사용하여 이미지 로드
+                }
+
 
             }
         }

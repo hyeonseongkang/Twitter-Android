@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/adapter_layout"
     android:layout_marginTop="20dp">
 
@@ -69,6 +70,15 @@
         android:paddingTop="20dp"
         android:paddingBottom="20dp">
 
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/photo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerHorizontal="true"
+            app:civ_border_width="1dp"
+            app:civ_border_color="#000000"
+            app:civ_border_overlay="true"/>
+
         <EditText
             android:id="@+id/modificationContent"
             android:layout_width="match_parent"
@@ -77,7 +87,9 @@
             android:paddingLeft="15dp"
             android:textSize="13dp"
             android:hint="I love Anroid!"
-            android:textColor="#000000"/>
+            android:textColor="#000000"
+            android:layout_below="@+id/photo"
+            android:layout_marginTop="15dp"/>
 
         <Button
             android:id="@+id/updateButton"

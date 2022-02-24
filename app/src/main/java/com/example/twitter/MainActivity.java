@@ -45,10 +45,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnPausedListener;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -76,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     private MainAdapter mainAdapter;
 
     private List<MainData> mainDataList = new ArrayList<>();
+    private List<Uri> photoUriList = new ArrayList<>();
 
     private CircleImageView userProfile, photo;
     private RelativeLayout addPhotoButton, writeButton;
@@ -90,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+
         content = (EditText) findViewById(R.id.content);
 
         FirebaseUser firebaseUser = mAuth.getCurrentUser();
@@ -97,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.mainRecyclerView);
         layoutManager = new LinearLayoutManager(MainActivity.this);
         recyclerView.setLayoutManager(layoutManager);
-        mainAdapter = new MainAdapter(mainDataList, firebaseUser.getEmail(),
+        mainAdapter = new MainAdapter(mainDataList, photoUriList, firebaseUser.getEmail(),
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -190,16 +195,43 @@ public class MainActivity extends AppCompatActivity {
                 String setContent =  content.getText().toString();
 
                 String key = myRef.push().getKey();
-                String photoKey = null;
+
                 if (photoBitmap != null) {
-                    photoKey = key;
-                    StorageReference mountainsRef = storageRef.child(photoKey+".jpg");
+                    String photoKey = key + ".jpg";
+                    StorageReference mountainsRef = storageRef.child(photoKey);
 
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     photoBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                     byte[] data = baos.toByteArray();
 
                     UploadTask uploadTask = mountainsRef.putBytes(data);
+
+
+                    uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                            Log.d(TAG, "Upload is " + progress + "% done");
+                            if (progress == 100.0) {
+                                storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        String photoUri = String.valueOf(uri);
+                                        myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, photoKey, false, photoUri));
+                                    }
+                                });
+
+                            }
+                        }
+                    }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                            Log.d(TAG, "Upload is paused");
+                        }
+                    });
+
+
+                    /*
                     uploadTask.addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
@@ -211,11 +243,25 @@ public class MainActivity extends AppCompatActivity {
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                             // ...
+
+                           // Log.d("저장Uri", String.valueOf(taskSnapshot.getUploadSessionUri().isRelative()));
+                            final Boolean[] b = {false};
+                            storageRef.child(p).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    photoUri2[0] = uri;
+                                }
+                            });
                         }
                     });
-                }
+                    */
 
-                myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, photoKey, false));
+                } else {
+                    myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, false));
+                }
+                //myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, photoKey, false, photoUri2[0]));
+
+
 
                 content.setText("");
                 photo.setImageBitmap(null);
@@ -258,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             Uri uri = data.getData();
+            Log.d("갤러리에서 가져온 Uri", String.valueOf(uri));
 
             try {
                 photoBitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), uri));
@@ -284,22 +331,33 @@ public class MainActivity extends AppCompatActivity {
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                     MainData mainData = childSnapshot.getValue(MainData.class);
 
+                    /*
                     String photoKey;
                     if (mainData.getPhotoKey() != null) {
                         photoKey = mainData.getPhotoKey() + ".jpg";
                         storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
-                                // Got the download URL for 'users/me/profile.png'
-                                Log.d(TAG, uri.toString());
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception exception) {
-                                // Handle any errors
+                                photoUriList.add(uri);
+                               // myRef.child(mainData.getKey()).child("photoUri").setValue(uri);
+                                Log.d("메인 Uri", String.valueOf(uri));
                             }
                         });
-                    }
+
+//                        storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                            @Override
+//                            public void onSuccess(Uri uri) {
+//                                // Got the download URL for 'users/me/profile.png'
+//                               // Log.d(TAG, uri.toString());
+//                            }
+//                        }).addOnFailureListener(new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception exception) {
+//                                // Handle any errors
+//                                Log.d("에러발생", exception.getMessage());
+//                            }
+//                        });
+                    }*/
                     mainDataList.add(mainData);
                     mainAdapter.notifyDataSetChanged();
 
