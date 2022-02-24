@@ -1,5 +1,9 @@
 package com.example.twitter;
 
+import android.content.Intent;
+import android.graphics.ImageDecoder;
+import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,24 +14,29 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.io.IOException;
 import java.util.List;
 
 class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
 
     private final static String TAG = "MainAdapter";
 
-    private List<MainData> dataList;
-    private String userEmail;
+    static public FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    static public DatabaseReference myRef = firebaseDatabase.getReference("Main");
+
+    static public List<MainData> dataList;
+    public String userEmail;
 
     static public View.OnClickListener clickDelete;
     static public View.OnClickListener clickModification;
 
-    static public View.OnClickListener clickUpdate;
     static public View.OnClickListener clickCancel;
-
 
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
@@ -43,8 +52,6 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
             super(v);
 
             content = (TextView) v.findViewById(R.id.content);
-
-
 
             // 내가 작성한 글일 경우
             if (viewType == 1) {
@@ -63,8 +70,28 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                 delete.setOnClickListener(clickDelete);
                 modification.setOnClickListener(clickModification);
 
-                updateButton.setOnClickListener(clickUpdate);
+                // content 수정하기
+                updateButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Object object = view.getTag();
+                        if (object != null) {
+                            int position = (int) object;
+                            if (modificationContent.getText().toString().length() != 0) {
+                                String updateContent = modificationContent.getText().toString();
+                                myRef.child(dataList.get(position).getKey()).child("modificationCheck").setValue(false);
+                                myRef.child(dataList.get(position).getKey()).child("content").setValue(updateContent);
+                            }
+                        }
+
+
+
+
+                    }
+                });
+
                 cancelButton.setOnClickListener(clickCancel);
+
             }
 
         }
@@ -73,30 +100,25 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
     public MainAdapter(List<MainData> getDataList, String getUserEmail,
                        View.OnClickListener deleteListener,
                        View.OnClickListener modificationListener,
-                       View.OnClickListener updateListener,
-                       View.OnClickListener cancelListener) {
+                       View.OnClickListener cancelListener
+                       ) {
         this.dataList = getDataList;
         this.userEmail = getUserEmail;
         clickDelete = deleteListener;
         clickModification = modificationListener;
-        clickUpdate = updateListener;
         clickCancel = cancelListener;
-
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (dataList.get(position).getUser().equals(userEmail)) {
-            return 1;
-        } else {
-            return 2;
-        }
+        if (dataList.get(position).getUser().equals(userEmail)) return 1;
+        else return 2;
+
     }
 
     @Override
     public MainAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v;
-        Log.d(TAG, String.valueOf(viewType) + " ViewHolder");
         if (viewType == 1) {
             // myView
             v = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter, parent, false);
@@ -105,12 +127,15 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
             v = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter2, parent, false);
         }
         MyViewHolder viewHolder = new MyViewHolder(v, viewType);
+
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
         // 내가 작성한 글일 경우
+
+
         if (getItemViewType(position) == 1) {
             holder.delete.setTag(position);
             holder.modification.setTag(position);
@@ -119,17 +144,18 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
             holder.modificationLayout.setVisibility(View.GONE);
             holder.basicLayout.setVisibility(View.VISIBLE);
 
+            // 수정 버튼이 활성화 되었다면
             if (dataList.get(position).getModificationCheck()) {
                 holder.basicLayout.setVisibility(View.GONE);
                 holder.modificationLayout.setVisibility(View.VISIBLE);
-                holder.modificationContent.setHint(dataList.get(position).getContent());
-            }
+                holder.modificationContent.setText(dataList.get(position).getContent());
+                holder.content.setTag(R.drawable.adapter_layout, holder.content.getText().toString());
 
+            }
         }
 
         holder.content.setText(dataList.get(position).getContent());
     }
-
 
 
     @Override

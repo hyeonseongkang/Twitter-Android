@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
                             if (object != null) {
                                 final int position = (int) object;
                                 Log.d(TAG, "MODIFICATION");
+                                // database - modificationCheck == true -> 수정 활성화
                                 myRef.child(mainDataList.get(position).getKey()).child("modificationCheck").setValue(true);
 
                             }
@@ -145,21 +146,11 @@ public class MainActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                         public void onClick(View view) {
-                            // update
-                            Object object = view.getTag();
-                            if (object != null) {
-                                final int position = (int) object;
-
-                            }
-                        }
-                },
-                new View.OnClickListener() {
-                    @Override
-                        public void onClick(View view) {
                             // cancel
                             Object object = view.getTag();
                             if (object != null) {
                                 final int position = (int) object;
+                                // database - modificationCheck == false -> 수정 비활성화
                                 myRef.child(mainDataList.get(position).getKey()).child("modificationCheck").setValue(false);
                             }
                         }
@@ -276,16 +267,13 @@ public class MainActivity extends AppCompatActivity {
                     userProfile.setImageBitmap(photoBitmap);
                 } else {
                     photo.setVisibility(View.VISIBLE);
-                    Log.d(TAG, "Hey");
                     photo.setImageBitmap(photoBitmap);
                 }
 
             }catch (IOException e) {
 
             }
-
         }
-
     }
 
     private void getData() {
@@ -294,16 +282,11 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 mainDataList.clear();
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                    Log.d(TAG, String.valueOf(childSnapshot.getValue()));
                     MainData mainData = childSnapshot.getValue(MainData.class);
-                    Log.d(TAG, mainData.getUser());
-                    Log.d(TAG, mainData.getContent());
-                    Log.d(TAG, mainData.getPhotoKey() == null ? "NULL" : mainData.getPhotoKey());
 
                     String photoKey;
                     if (mainData.getPhotoKey() != null) {
                         photoKey = mainData.getPhotoKey() + ".jpg";
-                        Log.d("PHOTOKEY", photoKey);
                         storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
