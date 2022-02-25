@@ -231,37 +231,9 @@ public class MainActivity extends AppCompatActivity {
                     });
 
 
-                    /*
-                    uploadTask.addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            // Handle unsuccessful uploads
-                            Log.d(TAG, "FAIL");
-                        }
-                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                            // ...
-
-                           // Log.d("저장Uri", String.valueOf(taskSnapshot.getUploadSessionUri().isRelative()));
-                            final Boolean[] b = {false};
-                            storageRef.child(p).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    photoUri2[0] = uri;
-                                }
-                            });
-                        }
-                    });
-                    */
-
                 } else {
                     myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, false));
                 }
-                //myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, photoKey, false, photoUri2[0]));
-
-
 
                 content.setText("");
                 photo.setImageBitmap(null);
@@ -330,34 +302,6 @@ public class MainActivity extends AppCompatActivity {
                 mainDataList.clear();
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                     MainData mainData = childSnapshot.getValue(MainData.class);
-
-                    /*
-                    String photoKey;
-                    if (mainData.getPhotoKey() != null) {
-                        photoKey = mainData.getPhotoKey() + ".jpg";
-                        storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                            @Override
-                            public void onSuccess(Uri uri) {
-                                photoUriList.add(uri);
-                               // myRef.child(mainData.getKey()).child("photoUri").setValue(uri);
-                                Log.d("메인 Uri", String.valueOf(uri));
-                            }
-                        });
-
-//                        storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                            @Override
-//                            public void onSuccess(Uri uri) {
-//                                // Got the download URL for 'users/me/profile.png'
-//                               // Log.d(TAG, uri.toString());
-//                            }
-//                        }).addOnFailureListener(new OnFailureListener() {
-//                            @Override
-//                            public void onFailure(@NonNull Exception exception) {
-//                                // Handle any errors
-//                                Log.d("에러발생", exception.getMessage());
-//                            }
-//                        });
-                    }*/
                     mainDataList.add(mainData);
                     mainAdapter.notifyDataSetChanged();
 

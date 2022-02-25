@@ -30,7 +30,6 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
-
     private final static String TAG = "MainAdapter";
 
     static public FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -44,7 +43,6 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
     static public View.OnClickListener clickModification;
 
     static public View.OnClickListener clickCancel;
-
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -94,10 +92,6 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                                 myRef.child(dataList.get(position).getKey()).child("content").setValue(updateContent);
                             }
                         }
-
-
-
-
                     }
                 });
 
@@ -146,37 +140,40 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
         // 내가 작성한 글일 경우
-
-
-        if (getItemViewType(position) == 1) {
-            holder.delete.setTag(position);
-            holder.modification.setTag(position);
-            holder.updateButton.setTag(position);
-            holder.cancelButton.setTag(position);
+        if (getItemViewType(holder.getAdapterPosition()) == 1) {
+            holder.delete.setTag(holder.getAdapterPosition());
+            holder.modification.setTag(holder.getAdapterPosition());
+            holder.updateButton.setTag(holder.getAdapterPosition());
+            holder.cancelButton.setTag(holder.getAdapterPosition());
             holder.modificationLayout.setVisibility(View.GONE);
             holder.basicLayout.setVisibility(View.VISIBLE);
+            holder.content.setText(dataList.get(holder.getAdapterPosition()).getContent());
 
             // 수정 버튼이 활성화 되었다면
-            if (dataList.get(position).getModificationCheck()) {
+            if (dataList.get(holder.getAdapterPosition()).getModificationCheck()) {
                 holder.basicLayout.setVisibility(View.GONE);
                 holder.modificationLayout.setVisibility(View.VISIBLE);
-                holder.modificationContent.setText(dataList.get(position).getContent());
-                holder.content.setTag(R.drawable.adapter_layout, holder.content.getText().toString());
+                holder.modificationContent.setText(dataList.get(holder.getAdapterPosition()).getContent());
+
 
                 // photoKey가 있다면 -> 사진까지 저장 했다면
-                String data = null;
-                data = dataList.get(position).getPhotoKey();
-                Log.d("메인어답터", data == null ? "NULL" : data);
-                if (dataList.get(position).getPhotoKey() != null) {
-                    Uri uri = Uri.parse(dataList.get(position).getPhotoUri());
+                if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null) {
+                    Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
                     Glide.with(holder.photo.getContext()).load(uri).into(holder.photo); // Glide를 사용하여 이미지 로드
+
+                } else {
+                    Glide.with(holder.photo.getContext()).load(R.drawable.gallery).into(holder.photo); // 기본 이미지 로드
                 }
 
-
+            } else {
+                holder.modificationLayout.setVisibility(View.GONE);
+                holder.basicLayout.setVisibility(View.VISIBLE);
             }
+        } else {
+            holder.content.setText(dataList.get(holder.getAdapterPosition()).getContent());
         }
 
-        holder.content.setText(dataList.get(position).getContent());
+
     }
 
 
