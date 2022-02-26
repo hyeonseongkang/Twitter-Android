@@ -65,6 +65,13 @@ public class MainActivity extends AppCompatActivity {
     public static String TAG = "MainActivity";
     public static final int PICK_IMAGE = 1;
     public static final int PICK_IMAGE2 = 2;
+    public static final int PICK_IMAGE3 = 3;
+
+    public static List<Uri> tempPhotoList = new ArrayList<>();
+    public static List<Integer> tempPhotoListKey = new ArrayList<>();
+
+    public String adapterPhotoKey;
+    public int index;
 
     private FirebaseAuth mAuth;
 
@@ -159,6 +166,21 @@ public class MainActivity extends AppCompatActivity {
                                 myRef.child(mainDataList.get(position).getKey()).child("modificationCheck").setValue(false);
                             }
                         }
+                },
+                new View.OnClickListener(){
+                    @Override
+                    public void onClick(View view) {
+                        // change photo
+                        Object object = view.getTag();
+                        adapterPhotoKey = null;
+                        if (object != null) {
+                            final int position = (int) object;
+                            Log.d("사진 교체", String.valueOf(position));
+                            pickImage(PICK_IMAGE3);
+                            index = position;
+                            adapterPhotoKey = mainDataList.get(position).getKey();
+                        }
+                    }
                 });
         recyclerView.setAdapter(mainAdapter);
         
@@ -272,8 +294,9 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        photoBitmap = null;
         if (resultCode == RESULT_OK) {
             Uri uri = data.getData();
             Log.d("갤러리에서 가져온 Uri", String.valueOf(uri));
@@ -284,9 +307,18 @@ public class MainActivity extends AppCompatActivity {
                 if (requestCode == 1) {
                     userProfile.setColorFilter(null);
                     userProfile.setImageBitmap(photoBitmap);
-                } else {
+                } else if (requestCode == 2) {
                     photo.setVisibility(View.VISIBLE);
                     photo.setImageBitmap(photoBitmap);
+                } else {
+                    // adapter Photo Change
+                    Log.d("메인 여기요2", String.valueOf(photoBitmap));
+                    Log.d("먼저 저장 할께요!", String.valueOf(index));
+                    // requestCode == 3 이라면 임시 저장소에 가져온 사진 Uri와 index값을 저장하여 adapter에서 사용할 수 있도록 한다.
+                    tempPhotoList.add(uri);
+                    tempPhotoListKey.add(index);
+                    mainAdapter.notifyItemChanged(index);
+                    index = -1;
                 }
 
             }catch (IOException e) {

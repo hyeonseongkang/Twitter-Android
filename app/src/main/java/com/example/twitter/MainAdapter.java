@@ -1,6 +1,7 @@
 package com.example.twitter;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
@@ -32,6 +33,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
     private final static String TAG = "MainAdapter";
 
+    public Bitmap photoBitmap;
+
     static public FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     static public DatabaseReference myRef = firebaseDatabase.getReference("Main");
 
@@ -43,6 +46,8 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
     static public View.OnClickListener clickModification;
 
     static public View.OnClickListener clickCancel;
+
+    static public View.OnClickListener clickPhotoChange;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -75,6 +80,10 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                 modification = (ImageButton) v.findViewById(R.id.modification);
 
                 photo = (CircleImageView) v.findViewById(R.id.photo);
+                photo.setEnabled(true);
+                photo.setClickable(true);
+
+                photo.setOnClickListener(clickPhotoChange);
 
                 delete.setOnClickListener(clickDelete);
                 modification.setOnClickListener(clickModification);
@@ -105,7 +114,8 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
     public MainAdapter(List<MainData> getDataList, List<Uri>getPhotoUriList,String getUserEmail,
                        View.OnClickListener deleteListener,
                        View.OnClickListener modificationListener,
-                       View.OnClickListener cancelListener
+                       View.OnClickListener cancelListener,
+                       View.OnClickListener photoChangeListener
                        ) {
         this.dataList = getDataList;
         this.photoUriList = getPhotoUriList;
@@ -113,6 +123,7 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
         clickDelete = deleteListener;
         clickModification = modificationListener;
         clickCancel = cancelListener;
+        clickPhotoChange = photoChangeListener;
     }
 
     @Override
@@ -145,6 +156,7 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
             holder.modification.setTag(holder.getAdapterPosition());
             holder.updateButton.setTag(holder.getAdapterPosition());
             holder.cancelButton.setTag(holder.getAdapterPosition());
+            holder.photo.setTag(holder.getAdapterPosition());
             holder.modificationLayout.setVisibility(View.GONE);
             holder.basicLayout.setVisibility(View.VISIBLE);
             holder.content.setText(dataList.get(holder.getAdapterPosition()).getContent());
@@ -155,14 +167,21 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                 holder.modificationLayout.setVisibility(View.VISIBLE);
                 holder.modificationContent.setText(dataList.get(holder.getAdapterPosition()).getContent());
 
-
-                // photoKey가 있다면 -> 사진까지 저장 했다면
-                if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null) {
-                    Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
-                    Glide.with(holder.photo.getContext()).load(uri).into(holder.photo); // Glide를 사용하여 이미지 로드
-
+                // tempPhotoListKey에 position 값이 있다면 -> temp에 저장된 사진이 있다면 해당 사진을 보여준다.
+                if (MainActivity.tempPhotoListKey.contains(position)) {
+                    int index = MainActivity.tempPhotoListKey.indexOf(position);
+                    Log.d("ㅇㅕ기요", String.valueOf(index));
+                    Log.d("여기요2", String.valueOf(MainActivity.tempPhotoList.get(index)));
+                    Glide.with(holder.photo.getContext()).load(MainActivity.tempPhotoList.get(index)).into(holder.photo);
                 } else {
-                    Glide.with(holder.photo.getContext()).load(R.drawable.gallery).into(holder.photo); // 기본 이미지 로드
+                    // photoKey가 있다면 -> 사진까지 저장 했다면
+                    if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null) {
+                        Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
+                        Glide.with(holder.photo.getContext()).load(uri).into(holder.photo); // Glide를 사용하여 이미지 로드
+
+                    } else {
+                        Glide.with(holder.photo.getContext()).load(R.drawable.gallery).into(holder.photo); // 기본 이미지 로드
+                    }
                 }
 
             } else {
