@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                             builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-
+ 
                                 }
                             });
 
@@ -164,6 +164,14 @@ public class MainActivity extends AppCompatActivity {
                                 final int position = (int) object;
                                 // database - modificationCheck == false -> 수정 비활성화
                                 myRef.child(mainDataList.get(position).getKey()).child("modificationCheck").setValue(false);
+
+                                // tempPhotoList, tempPhotoListKey에 position값이 있다면 제거하기
+                                int index = MainActivity.tempPhotoListKey.indexOf(position);
+                                if (index != -1) {
+                                    tempPhotoList.remove(index);
+                                    tempPhotoListKey.remove(index);
+                                }
+
                             }
                         }
                 },
