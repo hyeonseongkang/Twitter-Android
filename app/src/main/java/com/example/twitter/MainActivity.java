@@ -359,5 +359,23 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-    
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        // 앱 종료 시 모든 key에 대하여 modificationCheck == false로 하면서 다음에 앱이 실행 될 때 basicLayout이 보여지게 하기
+        for (int i = 0; i < mainDataList.size(); i++) {
+            myRef.child(mainDataList.get(i).getKey()).child("modificationCheck").setValue(false);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // 앱 종료 시 모든 key에 대하여 modificationCheck == false로 하면서 다음에 앱이 실행 될 때 basicLayout이 보여지게 하기
+        for (int i = 0; i < mainDataList.size(); i++) {
+            myRef.child(mainDataList.get(i).getKey()).child("modificationCheck").setValue(false);
+        }
+    }
+
 }
