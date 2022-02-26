@@ -23,8 +23,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnPausedListener;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -90,15 +94,75 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
 
                 // content 수정하기
                 updateButton.setOnClickListener(new View.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.P)
                     @Override
                     public void onClick(View view) {
                         Object object = view.getTag();
+                        MainActivity.progressBar.setVisibility(View.VISIBLE);
                         if (object != null) {
                             int position = (int) object;
                             if (modificationContent.getText().toString().length() != 0) {
+                                String key = dataList.get(position).getKey();
                                 String updateContent = modificationContent.getText().toString();
-                                myRef.child(dataList.get(position).getKey()).child("modificationCheck").setValue(false);
-                                myRef.child(dataList.get(position).getKey()).child("content").setValue(updateContent);
+                                //myRef.child(key).child("modificationCheck").setValue(false);
+                                myRef.child(key).child("content").setValue(updateContent);
+
+                                int index = MainActivity.tempPhotoListKey.indexOf(position);
+                                if (index != -1) {
+
+                                    FirebaseStorage storage = FirebaseStorage.getInstance();
+                                    StorageReference storageRef = storage.getReference();
+
+
+                                    String photoKey = dataList.get(position).getKey() + ".jpg";
+                                    StorageReference storageReference = storageRef.child(photoKey);
+
+                                    Bitmap photoBitmap = null;
+                                    try {
+                                        photoBitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(view.getContext().getContentResolver(), MainActivity.tempPhotoList.get(index)));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                    photoBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                                    byte[] data = baos.toByteArray();
+
+                                    UploadTask uploadTask = storageReference.putBytes(data);
+
+
+                                    uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                                            Log.d(TAG, "Upload is " + progress + "% done");
+                                            if (progress == 100.0) {
+                                                storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                    @Override
+                                                    public void onSuccess(Uri uri) {
+                                                        String photoUri = String.valueOf(uri);
+                                                        myRef.child(key).child("photoKey").setValue(photoKey);
+                                                        myRef.child(key).child("photoUri").setValue(photoUri);
+                                                    }
+                                                });
+
+                                            }
+                                            MainActivity.progressBar.setVisibility(View.GONE);
+                                        }
+                                    }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                                            Log.d(TAG, "Upload is paused");
+                                            MainActivity.progressBar.setVisibility(View.GONE);
+                                        }
+                                    });
+
+                                    MainActivity.tempPhotoList.remove(index);
+                                    MainActivity.tempPhotoListKey.remove(index);
+
+                                }
+
+
+
                             }
                         }
                     }
@@ -174,8 +238,8 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                     Log.d("여기요2", String.valueOf(MainActivity.tempPhotoList.get(index)));
                     Glide.with(holder.photo.getContext()).load(MainActivity.tempPhotoList.get(index)).into(holder.photo);
                 } else {
-                    // photoKey가 있다면 -> 사진까지 저장 했다면
-                    if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null) {
+                    // photoKey, photoUri가 있다면 -> 사진까지 저장 했다면
+                    if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null && dataList.get(holder.getAdapterPosition()).getPhotoUri() != null) {
                         Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
                         Glide.with(holder.photo.getContext()).load(uri).into(holder.photo); // Glide를 사용하여 이미지 로드
 

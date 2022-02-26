@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -94,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText content;
     private Bitmap photoBitmap = null;
 
+    public static ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
         content = (EditText) findViewById(R.id.content);
 
         FirebaseUser firebaseUser = mAuth.getCurrentUser();
+
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         recyclerView = (RecyclerView) findViewById(R.id.mainRecyclerView);
         layoutManager = new LinearLayoutManager(MainActivity.this);
@@ -134,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
                             builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
- 
                                 }
                             });
 
@@ -228,13 +232,13 @@ public class MainActivity extends AppCompatActivity {
 
                 if (photoBitmap != null) {
                     String photoKey = key + ".jpg";
-                    StorageReference mountainsRef = storageRef.child(photoKey);
+                    StorageReference storageReference = storageRef.child(photoKey);
 
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     photoBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                     byte[] data = baos.toByteArray();
 
-                    UploadTask uploadTask = mountainsRef.putBytes(data);
+                    UploadTask uploadTask = storageReference.putBytes(data);
 
 
                     uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -355,4 +359,5 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+    
 }
