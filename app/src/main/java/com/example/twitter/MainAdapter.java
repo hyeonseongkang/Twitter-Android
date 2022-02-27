@@ -62,12 +62,13 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
         public TextView content;
         public ImageButton delete, modification;
 
-        private CircleImageView photo;
+        private CircleImageView photo, image;
 
         public MyViewHolder(View v, int viewType) {
             super(v);
 
             content = (TextView) v.findViewById(R.id.content);
+            image = (CircleImageView) v.findViewById(R.id.image);
 
             // 내가 작성한 글일 경우
             if (viewType == 1) {
@@ -225,6 +226,14 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
             holder.basicLayout.setVisibility(View.VISIBLE);
             holder.content.setText(dataList.get(holder.getAdapterPosition()).getContent());
 
+            if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null && dataList.get(holder.getAdapterPosition()).getPhotoUri() != null) {
+                Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
+                Glide.with(holder.image.getContext()).load(uri).into(holder.image); // Glide를 사용하여 이미지 로드
+
+            } else {
+                holder.image.setVisibility(View.GONE);
+            }
+
             // 수정 버튼이 활성화 되었다면
             if (dataList.get(holder.getAdapterPosition()).getModificationCheck()) {
                 holder.basicLayout.setVisibility(View.GONE);
@@ -254,6 +263,13 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
             }
         } else {
             holder.content.setText(dataList.get(holder.getAdapterPosition()).getContent());
+            if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null && dataList.get(holder.getAdapterPosition()).getPhotoUri() != null) {
+                Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
+                Glide.with(holder.image.getContext()).load(uri).into(holder.image); // Glide를 사용하여 이미지 로드
+
+            } else {
+               holder.image.setVisibility(View.GONE);
+            }
         }
 
 
