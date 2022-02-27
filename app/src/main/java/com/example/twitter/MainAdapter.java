@@ -1,6 +1,5 @@
 package com.example.twitter;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
@@ -36,8 +35,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
     private final static String TAG = "MainAdapter";
-
-    public Bitmap photoBitmap;
 
     static public FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     static public DatabaseReference myRef = firebaseDatabase.getReference("Main");
@@ -105,15 +102,14 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                             if (modificationContent.getText().toString().length() != 0) {
                                 String key = dataList.get(position).getKey();
                                 String updateContent = modificationContent.getText().toString();
-                                //myRef.child(key).child("modificationCheck").setValue(false);
                                 myRef.child(key).child("content").setValue(updateContent);
 
                                 int index = MainActivity.tempPhotoListKey.indexOf(position);
+
                                 if (index != -1) {
 
                                     FirebaseStorage storage = FirebaseStorage.getInstance();
                                     StorageReference storageRef = storage.getReference();
-
 
                                     String photoKey = dataList.get(position).getKey() + ".jpg";
                                     StorageReference storageReference = storageRef.child(photoKey);
@@ -129,7 +125,6 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                                     byte[] data = baos.toByteArray();
 
                                     UploadTask uploadTask = storageReference.putBytes(data);
-
 
                                     uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                                         @Override
@@ -156,23 +151,16 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                                             MainActivity.progressBar.setVisibility(View.GONE);
                                         }
                                     });
-
                                     MainActivity.tempPhotoList.remove(index);
                                     MainActivity.tempPhotoListKey.remove(index);
-
                                 }
-
-
-
                             }
                         }
                     }
                 });
 
                 cancelButton.setOnClickListener(clickCancel);
-
             }
-
         }
     }
 
@@ -195,18 +183,17 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
     public int getItemViewType(int position) {
         if (dataList.get(position).getUser().equals(userEmail)) return 1;
         else return 2;
-
     }
 
     @Override
     public MainAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v;
         if (viewType == 1) {
-            // myView
-            v = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter, parent, false);
+            // myTweet
+            v = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.my_tweet, parent, false);
         } else {
-            // otherView
-            v = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter2, parent, false);
+            // Tweet
+            v = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet, parent, false);
         }
         MyViewHolder viewHolder = new MyViewHolder(v, viewType);
 
@@ -243,20 +230,16 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                 // tempPhotoListKey에 position 값이 있다면 -> temp에 저장된 사진이 있다면 해당 사진을 보여준다.
                 if (MainActivity.tempPhotoListKey.contains(position)) {
                     int index = MainActivity.tempPhotoListKey.indexOf(position);
-                    Log.d("ㅇㅕ기요", String.valueOf(index));
-                    Log.d("여기요2", String.valueOf(MainActivity.tempPhotoList.get(index)));
                     Glide.with(holder.photo.getContext()).load(MainActivity.tempPhotoList.get(index)).into(holder.photo);
                 } else {
                     // photoKey, photoUri가 있다면 -> 사진까지 저장 했다면
                     if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null && dataList.get(holder.getAdapterPosition()).getPhotoUri() != null) {
                         Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
                         Glide.with(holder.photo.getContext()).load(uri).into(holder.photo); // Glide를 사용하여 이미지 로드
-
                     } else {
                         Glide.with(holder.photo.getContext()).load(R.drawable.gallery).into(holder.photo); // 기본 이미지 로드
                     }
                 }
-
             } else {
                 holder.modificationLayout.setVisibility(View.GONE);
                 holder.basicLayout.setVisibility(View.VISIBLE);
@@ -271,10 +254,7 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                holder.image.setVisibility(View.GONE);
             }
         }
-
-
     }
-
 
     @Override
     public int getItemCount() {

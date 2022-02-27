@@ -64,17 +64,16 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MainActivity extends AppCompatActivity {
 
     public static String TAG = "MainActivity";
-    public static final int PICK_IMAGE = 1;
+    public static final int PICK_IMAGE1 = 1;
     public static final int PICK_IMAGE2 = 2;
     public static final int PICK_IMAGE3 = 3;
 
     public static List<Uri> tempPhotoList = new ArrayList<>();
     public static List<Integer> tempPhotoListKey = new ArrayList<>();
-
-    public String adapterPhotoKey;
     public int index;
 
     private FirebaseAuth mAuth;
+    private FirebaseUser firebaseUser;
 
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference myRef = firebaseDatabase.getReference("Main");
@@ -103,11 +102,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
-
+        firebaseUser = mAuth.getCurrentUser();
 
         content = (EditText) findViewById(R.id.content);
-
-        FirebaseUser firebaseUser = mAuth.getCurrentUser();
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
@@ -184,13 +181,11 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View view) {
                         // change photo
                         Object object = view.getTag();
-                        adapterPhotoKey = null;
                         if (object != null) {
                             final int position = (int) object;
                             Log.d("사진 교체", String.valueOf(position));
                             pickImage(PICK_IMAGE3);
                             index = position;
-                            adapterPhotoKey = mainDataList.get(position).getKey();
                         }
                     }
                 });
@@ -204,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, "set user Profile", Toast.LENGTH_SHORT).show();
-                pickImage(PICK_IMAGE);
+                pickImage(PICK_IMAGE1);
             }
         });
 
@@ -228,60 +223,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String setContent =  content.getText().toString();
 
-                String key = myRef.push().getKey();
+                writeData(setContent);
 
-                if (photoBitmap != null) {
-                    String photoKey = key + ".jpg";
-                    StorageReference storageReference = storageRef.child(photoKey);
-
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    photoBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                    byte[] data = baos.toByteArray();
-
-                    UploadTask uploadTask = storageReference.putBytes(data);
-
-
-                    uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                            Log.d(TAG, "Upload is " + progress + "% done");
-                            if (progress == 100.0) {
-                                storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        String photoUri = String.valueOf(uri);
-                                        myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, photoKey, false, photoUri));
-                                    }
-                                });
-
-                            }
-                        }
-                    }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
-                            Log.d(TAG, "Upload is paused");
-                        }
-                    });
-
-
-                } else {
-                    myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), setContent, false));
-                }
-
-                content.setText("");
-                photo.setImageBitmap(null);
-                photo.setVisibility(View.GONE);
-                photoBitmap = null;
-
-                recyclerView.scrollToPosition(mainDataList.size());
             }
         });
 
         getData();
 
-
-
+        // 권한 설정
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
@@ -303,7 +252,6 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, imageCode);
     }
 
-
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -324,8 +272,6 @@ public class MainActivity extends AppCompatActivity {
                     photo.setImageBitmap(photoBitmap);
                 } else {
                     // adapter Photo Change
-                    Log.d("메인 여기요2", String.valueOf(photoBitmap));
-                    Log.d("먼저 저장 할께요!", String.valueOf(index));
                     // requestCode == 3 이라면 임시 저장소에 가져온 사진 Uri와 index값을 저장하여 adapter에서 사용할 수 있도록 한다.
                     tempPhotoList.add(uri);
                     tempPhotoListKey.add(index);
@@ -357,7 +303,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
     }
 
     @Override
@@ -376,6 +321,53 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < mainDataList.size(); i++) {
             myRef.child(mainDataList.get(i).getKey()).child("modificationCheck").setValue(false);
         }
+    }
+
+    private void writeData(String getContent) {
+        String key = myRef.push().getKey();
+        if (photoBitmap != null) {
+            String photoKey = key + ".jpg";
+            StorageReference storageReference = storageRef.child(photoKey);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            photoBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
+
+            UploadTask uploadTask = storageReference.putBytes(data);
+
+
+            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    Log.d(TAG, "Upload is " + progress + "% done");
+                    if (progress == 100.0) {
+                        storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                String photoUri = String.valueOf(uri);
+                                myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), getContent, photoKey, false, photoUri));
+                            }
+                        });
+
+                    }
+                }
+            }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                    Log.d(TAG, "Upload is paused");
+                }
+            });
+        } else {
+            myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), getContent, false));
+        }
+
+        content.setText("");
+        photo.setImageBitmap(null);
+        photo.setVisibility(View.GONE);
+        photoBitmap = null;
+
+        recyclerView.scrollToPosition(mainDataList.size());
     }
 
 }

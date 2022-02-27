@@ -57,10 +57,6 @@ public class LoginActivity extends AppCompatActivity {
         userEmail = (EditText) findViewById(R.id.userEmail);
         userPassword = (EditText) findViewById(R.id.userPassword);
 
-        userEmail.setText("12345@naver.com");
-        userPassword.setText("12341234");
-
-
         createUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -102,6 +98,8 @@ public class LoginActivity extends AppCompatActivity {
                 signIn();
             }
         });
+
+
 
 
     }
