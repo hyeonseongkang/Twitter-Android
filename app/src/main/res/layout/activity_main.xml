@@ -112,7 +112,7 @@
         <RelativeLayout
             android:id="@+id/addPhotoButton"
             android:layout_width="wrap_content"
-            android:layout_height="18dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="18dp">
 
@@ -121,15 +121,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Add Photos"
+                android:padding="3dp"
+                android:gravity="center"
                 android:textColor="#1D9BF0"
                 android:textSize="16dp"
                 android:textStyle="bold" />
 
             <ImageView
-                android:layout_width="12dp"
-                android:layout_height="12dp"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="7dp"
+                android:layout_marginLeft="0dp"
                 android:layout_toRightOf="@+id/add"
                 android:src="@drawable/plus"
                 android:tint="#1D9BF0" />

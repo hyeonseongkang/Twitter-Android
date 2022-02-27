@@ -1,6 +1,7 @@
 package com.example.twitter;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -40,6 +41,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -83,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
-    private MainAdapter mainAdapter;
+    public static MainAdapter mainAdapter;
 
     private List<MainData> mainDataList = new ArrayList<>();
     private List<Uri> photoUriList = new ArrayList<>();
@@ -183,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
                         Object object = view.getTag();
                         if (object != null) {
                             final int position = (int) object;
-                            Log.d("사진 교체", String.valueOf(position));
                             pickImage(PICK_IMAGE3);
                             index = position;
                         }
@@ -259,7 +260,6 @@ public class MainActivity extends AppCompatActivity {
         photoBitmap = null;
         if (resultCode == RESULT_OK) {
             Uri uri = data.getData();
-            Log.d("갤러리에서 가져온 Uri", String.valueOf(uri));
 
             try {
                 photoBitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), uri));
@@ -267,15 +267,18 @@ public class MainActivity extends AppCompatActivity {
                 if (requestCode == 1) {
                     userProfile.setColorFilter(null);
                     userProfile.setImageBitmap(photoBitmap);
+                    photoBitmap = null;
                 } else if (requestCode == 2) {
                     photo.setVisibility(View.VISIBLE);
                     photo.setImageBitmap(photoBitmap);
+                    photoBitmap = null;
                 } else {
                     // adapter Photo Change
                     // requestCode == 3 이라면 임시 저장소에 가져온 사진 Uri와 index값을 저장하여 adapter에서 사용할 수 있도록 한다.
                     tempPhotoList.add(uri);
                     tempPhotoListKey.add(index);
                     mainAdapter.notifyItemChanged(index);
+                    photoBitmap = null;
                     index = -1;
                 }
 
@@ -286,16 +289,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getData() {
+
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 mainDataList.clear();
+                Log.d(TAG, "HELLO");
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                     MainData mainData = childSnapshot.getValue(MainData.class);
                     mainDataList.add(mainData);
-                    mainAdapter.notifyDataSetChanged();
-
                 }
+                mainAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -303,15 +307,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        // 앱 종료 시 모든 key에 대하여 modificationCheck == false로 하면서 다음에 앱이 실행 될 때 basicLayout이 보여지게 하기
-        for (int i = 0; i < mainDataList.size(); i++) {
-            myRef.child(mainDataList.get(i).getKey()).child("modificationCheck").setValue(false);
-        }
     }
 
     @Override

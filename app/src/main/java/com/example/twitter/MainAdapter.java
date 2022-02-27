@@ -102,7 +102,7 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                             if (modificationContent.getText().toString().length() != 0) {
                                 String key = dataList.get(position).getKey();
                                 String updateContent = modificationContent.getText().toString();
-                                myRef.child(key).child("content").setValue(updateContent);
+
 
                                 int index = MainActivity.tempPhotoListKey.indexOf(position);
 
@@ -136,8 +136,23 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                                                     @Override
                                                     public void onSuccess(Uri uri) {
                                                         String photoUri = String.valueOf(uri);
-                                                        myRef.child(key).child("photoKey").setValue(photoKey);
+
+                                                        myRef.child(key).setValue(new MainData(key, dataList.get(position).getUser(), updateContent, photoKey, false, photoUri));
+
+                                                        /*
+                                                        myRef.child(key).child("content").setValue(updateContent);
                                                         myRef.child(key).child("photoUri").setValue(photoUri);
+                                                        myRef.child(key).child("photoKey").setValue(photoKey);
+                                                        myRef.child(key).child("modificationCheck").setValue(false);
+
+                                                        위와 같이 코드를 작성한다면 MainAcitivty->getData()는 4번 호출 됨
+                                                        addValueEventListener()-> Child가 변경될 때 마다 호출되고 위의 코드는 4번 child를 변경하므로 child를 변경할 때마다 addValueEventListener()가 호출됨
+                                                        */
+
+                                                        Log.d(TAG, "Save Complete");
+                                                        MainActivity.tempPhotoList.remove(index);
+                                                        MainActivity.tempPhotoListKey.remove(index);
+
                                                     }
                                                 });
 
@@ -151,14 +166,11 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                                             MainActivity.progressBar.setVisibility(View.GONE);
                                         }
                                     });
-                                    MainActivity.tempPhotoList.remove(index);
-                                    MainActivity.tempPhotoListKey.remove(index);
                                 }
                             }
                         }
                     }
                 });
-
                 cancelButton.setOnClickListener(clickCancel);
             }
         }
@@ -213,13 +225,12 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
             holder.basicLayout.setVisibility(View.VISIBLE);
             holder.content.setText(dataList.get(holder.getAdapterPosition()).getContent());
 
-            if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null && dataList.get(holder.getAdapterPosition()).getPhotoUri() != null) {
-                Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
-                Glide.with(holder.image.getContext()).load(uri).into(holder.image); // Glide를 사용하여 이미지 로드
+            holder.image.setVisibility(View.VISIBLE);
 
-            } else {
-                holder.image.setVisibility(View.GONE);
-            }
+//            Glide.with(holder.image.getContext())
+//                    .load(dataList.get(holder.getAdapterPosition()).getPhotoUri() != null ? dataList.get(holder.getAdapterPosition()).getPhotoUri() : 0)
+//                    .into(holder.image);
+
 
             // 수정 버튼이 활성화 되었다면
             if (dataList.get(holder.getAdapterPosition()).getModificationCheck()) {
@@ -243,13 +254,18 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
             } else {
                 holder.modificationLayout.setVisibility(View.GONE);
                 holder.basicLayout.setVisibility(View.VISIBLE);
+                if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null && dataList.get(holder.getAdapterPosition()).getPhotoUri() != null) {
+                    Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
+                    Glide.with(holder.image.getContext()).load(uri).into(holder.image); // Glide를 사용하여 이미지 로드
+                } else {
+                    holder.image.setVisibility(View.GONE);
+                }
             }
         } else {
             holder.content.setText(dataList.get(holder.getAdapterPosition()).getContent());
             if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null && dataList.get(holder.getAdapterPosition()).getPhotoUri() != null) {
                 Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
                 Glide.with(holder.image.getContext()).load(uri).into(holder.image); // Glide를 사용하여 이미지 로드
-
             } else {
                holder.image.setVisibility(View.GONE);
             }

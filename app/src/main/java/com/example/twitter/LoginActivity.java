@@ -44,6 +44,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+
+
         mAuth = FirebaseAuth.getInstance();
 
         signInButton = (AppCompatButton) findViewById(R.id.signInButton);
@@ -56,6 +58,9 @@ public class LoginActivity extends AppCompatActivity {
 
         userEmail = (EditText) findViewById(R.id.userEmail);
         userPassword = (EditText) findViewById(R.id.userPassword);
+
+        userEmail.setText("tweet123@gmail.com");
+        userPassword.setText("tweet123");
 
         createUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,9 +113,10 @@ public class LoginActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            Toast.makeText(this, "nothing users", Toast.LENGTH_SHORT).show();
-        }
+        if (currentUser != null)
+            Log.d(TAG, "currentUser != null");
+
+
     }
 
     private boolean emptyCheck(String email, String password) {
