@@ -267,11 +267,11 @@ public class MainActivity extends AppCompatActivity {
                 if (requestCode == 1) {
                     userProfile.setColorFilter(null);
                     userProfile.setImageBitmap(photoBitmap);
-                    photoBitmap = null;
+
                 } else if (requestCode == 2) {
                     photo.setVisibility(View.VISIBLE);
                     photo.setImageBitmap(photoBitmap);
-                    photoBitmap = null;
+
                 } else {
                     // adapter Photo Change
                     // requestCode == 3 이라면 임시 저장소에 가져온 사진 Uri와 index값을 저장하여 adapter에서 사용할 수 있도록 한다.

@@ -166,6 +166,8 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                                             MainActivity.progressBar.setVisibility(View.GONE);
                                         }
                                     });
+                                } else {
+                                    myRef.child(key).child("content").setValue(updateContent);
                                 }
                             }
                         }
@@ -263,6 +265,7 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
             }
         } else {
             holder.content.setText(dataList.get(holder.getAdapterPosition()).getContent());
+            holder.image.setVisibility(View.VISIBLE);
             if (dataList.get(holder.getAdapterPosition()).getPhotoKey() != null && dataList.get(holder.getAdapterPosition()).getPhotoUri() != null) {
                 Uri uri = Uri.parse(dataList.get(holder.getAdapterPosition()).getPhotoUri());
                 Glide.with(holder.image.getContext()).load(uri).into(holder.image); // Glide를 사용하여 이미지 로드

@@ -58,10 +58,7 @@ public class LoginActivity extends AppCompatActivity {
 
         userEmail = (EditText) findViewById(R.id.userEmail);
         userPassword = (EditText) findViewById(R.id.userPassword);
-
-        userEmail.setText("tweet123@gmail.com");
-        userPassword.setText("tweet123");
-
+        
         createUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
