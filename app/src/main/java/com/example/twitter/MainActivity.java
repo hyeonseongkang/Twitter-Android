@@ -74,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     public static List<Integer> tempPhotoListKey = new ArrayList<>();
     public int index;
 
+    FirebaseController firebaseController;
+
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
 
@@ -102,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        firebaseController = new FirebaseController();
 
         mAuth = FirebaseAuth.getInstance();
         firebaseUser = mAuth.getCurrentUser();
@@ -224,7 +228,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String setContent =  content.getText().toString();
 
-                writeData(setContent);
+                firebaseController.writeData(setContent, photoBitmap);
+
+                content.setText("");
+                photo.setImageBitmap(null);
+                photo.setVisibility(View.GONE);
+                photoBitmap = null;
+
+                recyclerView.scrollToPosition(mainDataList.size());
 
             }
         });
@@ -318,6 +329,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /*
     private void writeData(String getContent) {
         String key = myRef.push().getKey();
         if (photoBitmap != null) {
@@ -363,6 +375,5 @@ public class MainActivity extends AppCompatActivity {
         photoBitmap = null;
 
         recyclerView.scrollToPosition(mainDataList.size());
-    }
-
+    }*/
 }
