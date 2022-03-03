@@ -61,6 +61,8 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
 
         private CircleImageView photo, image;
 
+        FirebaseController firebaseController = new FirebaseController();
+
         public MyViewHolder(View v, int viewType) {
             super(v);
 
@@ -107,19 +109,22 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                                 int index = MainActivity.tempPhotoListKey.indexOf(position);
 
                                 if (index != -1) {
-
-                                    FirebaseStorage storage = FirebaseStorage.getInstance();
-                                    StorageReference storageRef = storage.getReference();
-
-                                    String photoKey = dataList.get(position).getKey() + ".jpg";
-                                    StorageReference storageReference = storageRef.child(photoKey);
-
                                     Bitmap photoBitmap = null;
                                     try {
                                         photoBitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(view.getContext().getContentResolver(), MainActivity.tempPhotoList.get(index)));
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
+
+                                    firebaseController.writeData(key, updateContent, photoBitmap, true, index);
+
+                                    /*
+                                    FirebaseStorage storage = FirebaseStorage.getInstance();
+                                    StorageReference storageRef = storage.getReference();
+
+                                    String photoKey = dataList.get(position).getKey() + ".jpg";
+                                    StorageReference storageReference = storageRef.child(photoKey);
+
                                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                                     photoBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                                     byte[] data = baos.toByteArray();
@@ -139,7 +144,7 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
 
                                                         myRef.child(key).setValue(new MainData(key, dataList.get(position).getUser(), updateContent, photoKey, false, photoUri));
 
-                                                        /*
+
                                                         myRef.child(key).child("content").setValue(updateContent);
                                                         myRef.child(key).child("photoUri").setValue(photoUri);
                                                         myRef.child(key).child("photoKey").setValue(photoKey);
@@ -147,7 +152,7 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
 
                                                         위와 같이 코드를 작성한다면 MainAcitivty->getData()는 4번 호출 됨
                                                         addValueEventListener()-> Child가 변경될 때 마다 호출되고 위의 코드는 4번 child를 변경하므로 child를 변경할 때마다 addValueEventListener()가 호출됨
-                                                        */
+
 
                                                         Log.d(TAG, "Save Complete");
                                                         MainActivity.tempPhotoList.remove(index);
@@ -157,7 +162,7 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                                                 });
 
                                             }
-                                            MainActivity.progressBar.setVisibility(View.GONE);
+
                                         }
                                     }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
                                         @Override
@@ -165,10 +170,12 @@ class MainAdapter  extends RecyclerView.Adapter<MainAdapter.MyViewHolder>{
                                             Log.d(TAG, "Upload is paused");
                                             MainActivity.progressBar.setVisibility(View.GONE);
                                         }
-                                    });
+                                    });*/
+
                                 } else {
                                     myRef.child(key).child("content").setValue(updateContent);
                                 }
+                                MainActivity.progressBar.setVisibility(View.GONE);
                             }
                         }
                     }

@@ -31,12 +31,18 @@ class FirebaseController {
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseUser firebaseUser = mAuth.getCurrentUser();
 
-    protected void writeData(String getContent, Bitmap photoBitmap) {
-        String key = myRef.push().getKey();
+    protected void writeData(String getKey, String getContent, Bitmap photoBitmap, boolean tempDelete, int index) {
+        String key;
+        if (getKey == null) key= myRef.push().getKey();
+        else key= getKey;
+
         if (photoBitmap != null) {
+
+            upLoadPhoto(key, photoBitmap, getContent, tempDelete, index);
+
+            /*
             String photoKey = key + ".jpg";
             StorageReference storageReference = storageRef.child(photoKey);
-
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             photoBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
@@ -55,6 +61,7 @@ class FirebaseController {
                             public void onSuccess(Uri uri) {
                                 String photoUri = String.valueOf(uri);
                                 myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), getContent, photoKey, false, photoUri));
+
                             }
                         });
 
@@ -66,9 +73,50 @@ class FirebaseController {
                     Log.d(TAG, "Upload is paused");
                 }
             });
+            */
+
         } else {
             myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), getContent, false));
         }
+    }
+
+    private void upLoadPhoto(String key, Bitmap photo, String content, boolean tempDelete, int index) {
+
+        String photoKey = key + ".jpg";
+        StorageReference storageReference = storageRef.child(photoKey);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        photo.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        UploadTask uploadTask = storageReference.putBytes(data);
+
+        uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                Log.d(TAG, "Upload is " + progress + "% done");
+                if (progress == 100.0) {
+                    storageRef.child(photoKey).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            String photoUri = String.valueOf(uri);
+                            myRef.child(key).setValue(new MainData(key, firebaseUser.getEmail(), content, photoKey, false, photoUri));
+
+                            if (tempDelete) {
+                                MainActivity.tempPhotoList.remove(index);
+                                MainActivity.tempPhotoListKey.remove(index);
+                            }
+                        }
+                    });
+
+                }
+            }
+        }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.d(TAG, "Upload is paused");
+            }
+        });
     }
 
 }

@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String setContent =  content.getText().toString();
 
-                firebaseController.writeData(setContent, photoBitmap);
+                firebaseController.writeData(null, setContent, photoBitmap, false, -1);
 
                 content.setText("");
                 photo.setImageBitmap(null);
