@@ -157,7 +157,8 @@ public class MainActivity extends AppCompatActivity {
                                 final int position = (int) object;
                                 Log.d(TAG, "MODIFICATION");
                                 // database - modificationCheck == true -> 수정 활성화
-                                myRef.child(mainDataList.get(position).getKey()).child("modificationCheck").setValue(true);
+                                firebaseController.modificationState(mainDataList.get(position).getKey(), true);
+                                //myRef.child(mainDataList.get(position).getKey()).child("modificationCheck").setValue(true);
 
                             }
                         }
@@ -170,7 +171,8 @@ public class MainActivity extends AppCompatActivity {
                             if (object != null) {
                                 final int position = (int) object;
                                 // database - modificationCheck == false -> 수정 비활성화
-                                myRef.child(mainDataList.get(position).getKey()).child("modificationCheck").setValue(false);
+                                firebaseController.modificationState(mainDataList.get(position).getKey(), false);
+                                //myRef.child(mainDataList.get(position).getKey()).child("modificationCheck").setValue(false);
 
                                 // tempPhotoList, tempPhotoListKey에 position값이 있다면 제거하기
                                 int index = MainActivity.tempPhotoListKey.indexOf(position);
@@ -325,7 +327,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         // 앱 종료 시 모든 key에 대하여 modificationCheck == false로 하면서 다음에 앱이 실행 될 때 basicLayout이 보여지게 하기
         for (int i = 0; i < mainDataList.size(); i++) {
-            myRef.child(mainDataList.get(i).getKey()).child("modificationCheck").setValue(false);
+            firebaseController.modificationState(mainDataList.get(i).getKey(), false);
+            //myRef.child(mainDataList.get(i).getKey()).child("modificationCheck").setValue(false);
         }
     }
 

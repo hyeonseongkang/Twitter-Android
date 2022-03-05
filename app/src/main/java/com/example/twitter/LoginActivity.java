@@ -44,8 +44,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-
-
         mAuth = FirebaseAuth.getInstance();
 
         signInButton = (AppCompatButton) findViewById(R.id.signInButton);
